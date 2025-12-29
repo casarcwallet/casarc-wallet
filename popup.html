@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Casarc Wallet</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div id="screen-loading" class="screen centered">
+        <div class="welcome-inner">
+          <div class="welcome-logo">Casarc</div>
+          <h1 class="welcome-title">Loading</h1>
+          <p class="welcome-sub">Opening your Casarc wallet...</p>
+        </div>
+      </div>
+
+      <div id="screen-init" class="screen centered hidden">
+        <div class="welcome-inner">
+          <div class="welcome-logo">Casarc</div>
+          <h1 class="welcome-title">Welcome</h1>
+          <p class="welcome-sub">Create a new wallet or restore an existing one.</p>
+          <button id="btnCreate" class="btn-primary-lg">Create new wallet</button>
+          <button id="btnImport" class="btn-outline-lg">I already have a wallet</button>
+        </div>
+      </div>
+
+      <div id="screen-create-method" class="screen centered hidden">
+        <div class="welcome-inner">
+          <div class="welcome-logo">Casarc</div>
+          <h1 class="welcome-title">Create wallet</h1>
+          <p class="welcome-sub">Choose a method to create or restore your wallet.</p>
+
+          <button id="btnContinueGoogle" class="btn-primary-lg">Continue with Google</button>
+          <button id="btnContinueEmail" class="btn-outline-lg">Continue with Email</button>
+          <button id="btnContinueX" class="btn-outline-lg">Continue with X</button>
+          <button id="btnContinueSeed" class="btn-outline-lg">Use secret recovery phrase</button>
+
+          <button id="btnCreateMethodBack" class="btn secondary full" style="margin-top:12px;">Back</button>
+        </div>
+      </div>
+
+      <div id="screen-create" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="welcome">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+          <h2 class="step-title">Set password</h2>
+          <p>This password encrypts your wallet on this device. Keep it safe and do not forget it.</p>
+          <input id="pw1" class="input" type="password" placeholder="Password (min 8 chars)" />
+          <input id="pw2" class="input" type="password" placeholder="Repeat password" />
+          <button id="btnSetPassword" class="btn primary full">Continue</button>
+        </div>
+      </div>
+
+      <div id="screen-import" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="welcome">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+          <h2 class="step-title">Import wallet</h2>
+          <p>Enter your seed phrase to restore your wallet.</p>
+          <textarea id="mnemonicInput" class="textarea" placeholder="Seed phrase"></textarea>
+          <button id="btnImportNext" class="btn primary full">Continue</button>
+        </div>
+      </div>
+
+      <div id="screen-show-seed" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="brand-logo-text">Casarc Wallet</div>
+          <h2 class="step-title">Your seed phrase</h2>
+          <p>Write this down offline. This will not be shown again.</p>
+          <div id="mnemonicBox" class="mnemonic-box"></div>
+          <div class="onboard-actions">
+            <button id="btnCopyMnemonic" class="btn secondary">Copy</button>
+            <button id="btnDoneMnemonic" class="btn primary">I saved it</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-lock" class="screen centered hidden">
+        <div class="welcome-inner">
+          <div class="welcome-logo">Casarc</div>
+          <h1 class="welcome-title">Unlock wallet</h1>
+          <p class="welcome-sub">Enter your password to unlock your Casarc wallet.</p>
+          <input id="unlockPassword" class="input" type="password" placeholder="Password" />
+          <button id="btnUnlock" class="btn-primary-lg">Unlock</button>
+        </div>
+      </div>
+
+      <div id="screen-app" class="screen app-layout hidden">
+        <div id="walletHeader" class="wallet-header-card">
+          <div class="wallet-header-title">Casarc Wallet</div>
+
+          <div class="account-switch-row">
+            <button id="btnOpenAccounts" class="account-switch">
+              <span id="activeAccountName">Account 1</span>
+              <span class="account-chevron">▾</span>
+            </button>
+          </div>
+
+          <div class="wallet-address-row">
+            <div id="walletAddressDisplay" class="wallet-address" title="Copy address">0x...</div>
+            <span id="walletCopyIcon" class="copy-icon" title="Copy address">⧉</span>
+            <button id="btnHeaderLock" class="btn tiny">Lock</button>
+          </div>
+
+          <div class="wallet-balance" id="walletTotalUsd">$0.00</div>
+          <div class="wallet-sub" id="walletUsdcLabel">0.000000 USDC</div>
+
+          <div class="wallet-actions">
+            <button id="btnOpenSend" class="btn primary pill-lg">Send</button>
+            <button id="btnOpenReceive" class="btn secondary pill-lg">Receive</button>
+            <button id="btnOpenSwap" class="btn secondary pill-lg">Swap</button>
+            <button id="btnFaucet" class="btn secondary pill-lg">Faucet</button>
+          </div>
+        </div>
+
+        <div id="page-wallet" class="page">
+          <div class="card tokens-card">
+            <div class="card-title-row">
+              <div class="card-title">Tokens</div>
+              <label class="hidezero-label">
+                <input id="chkHideZero" type="checkbox" /> Hide zero balances
+              </label>
+            </div>
+            <div id="tokenList"></div>
+            <div class="tokens-actions" style="margin-top: 8px;">
+              <button id="btnImportToken" class="btn secondary full">Import token</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-history" class="page hidden">
+          <div class="card">
+            <div class="card-title">History</div>
+            <div class="history-list">
+              <div class="history-item">
+                <div class="history-label">No local activity yet</div>
+                <div class="history-time">
+                  Your on-chain transaction history will appear here once available.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-settings" class="page hidden">
+          <div class="settings-container">
+            <h2 class="settings-title">Settings</h2>
+
+            <button id="btnConnectedDapps" class="settings-btn">Connected DApps</button>
+            <div id="connectedDappsList" class="settings-sub hidden"></div>
+
+            <button id="btnSecurity" class="settings-btn">Security</button>
+            <div id="securitySection" class="settings-sub hidden">
+              <button id="btnShowKeys" class="sub-btn">Show seed / private key</button>
+              <div id="keysDisplay" class="keys-display hidden"></div>
+            </div>
+
+            <button id="btnAppearance" class="settings-btn">Appearance</button>
+            <div id="appearanceSection" class="settings-sub hidden">
+              <button id="btnThemeDark" class="sub-btn">Dark</button>
+              <button id="btnThemeLight" class="sub-btn">Light</button>
+            </div>
+
+            <button id="btnLock" class="settings-btn">Lock Wallet</button>
+
+            <button id="btnDelete" class="settings-btn danger">
+              Delete wallet from this browser
+            </button>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <button class="nav-btn active" data-page="wallet">Wallet</button>
+          <button class="nav-btn" data-page="history">History</button>
+          <button class="nav-btn" data-page="settings">Settings</button>
+        </div>
+      </div>
+
+      <div id="screen-accounts" class="screen centered hidden">
+        <div class="card-accounts">
+          <div class="accounts-header">
+            <div class="accounts-title">Accounts</div>
+            <button id="btnCloseAccounts" class="btn tiny">X</button>
+          </div>
+
+          <input id="accountSearch" class="input" placeholder="Search your accounts" />
+          <div id="accountsList" class="accounts-list"></div>
+
+          <button id="btnAddAccount" class="btn full add-wallet-btn">Add wallet</button>
+
+          <div id="addAccountMenu" class="add-account-menu hidden">
+            <button id="btnCreateNewAccount" class="add-account-item">Create new account</button>
+            <button id="btnAddByMnemonic" class="add-account-item">Import wallet (seed phrase)</button>
+            <button id="btnAddByPrivateKey" class="add-account-item">Import account (private key)</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-send" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="app">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+          <h2 class="step-title">Send token</h2>
+          <p>Select token, recipient and amount.</p>
+          <input id="sendTo" class="input" placeholder="Recipient address (0x...)" />
+          <select id="sendTokenSelect" class="input"></select>
+          <input id="sendAmount" class="input" placeholder="Amount" />
+          <button id="btnSendNow" class="btn primary full">Send</button>
+        </div>
+      </div>
+
+      <div id="screen-send-confirm" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="send">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+
+          <h2 class="step-title">Review transfer</h2>
+          <p>Please review the details before sending.</p>
+
+          <div class="mnemonic-box" style="font-size: 11px; line-height: 1.5;">
+            <div><strong>From:</strong> <span id="sendConfirmFrom"></span></div>
+            <div><strong>To:</strong> <span id="sendConfirmTo"></span></div>
+            <div><strong>Token:</strong> <span id="sendConfirmToken"></span></div>
+            <div><strong>Amount:</strong> <span id="sendConfirmAmount"></span></div>
+            <div><strong>Estimated fee:</strong> <span id="sendConfirmFee"></span></div>
+          </div>
+
+          <div class="onboard-actions" style="margin-top: 16px;">
+            <button id="btnSendConfirm" class="btn primary full">Confirm</button>
+            <button id="btnSendReject" class="btn secondary full">Reject</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-sign" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="app">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+          <h2 class="step-title">Sign Request</h2>
+          <p id="signMessage">Loading message...</p>
+          <div class="onboard-actions" style="margin-top: 16px;">
+            <button id="btnSignApprove" class="btn primary full">Sign</button>
+            <button id="btnSignReject" class="btn secondary full">Reject</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-connect" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+
+          <h2 class="step-title">Connect DApp</h2>
+          <p>Do you want to connect this site to your Casarc wallet?</p>
+
+          <div class="mnemonic-box" style="font-size:12px; line-height:1.5;">
+            <div><strong>Site:</strong> <span id="connectDappOrigin">Loading...</span></div>
+          </div>
+
+          <div class="onboard-actions" style="margin-top:16px;">
+            <button id="btnConnectApprove" class="btn primary full">Connect</button>
+            <button id="btnConnectReject" class="btn secondary full">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-tx" class="screen hidden">
+        <div class="card sign-card">
+          <div class="card-header">
+            <button class="btn back" data-back="app">←</button>
+            <div class="card-title">Casarc Wallet</div>
+          </div>
+
+          <div class="card-body">
+            <h2 class="card-heading">Confirm Transaction</h2>
+            <p class="card-subtitle">Please review the transaction details.</p>
+
+            <div id="txSummary" class="sign-message-box">Loading transaction...</div>
+          </div>
+
+          <div class="card-actions">
+            <button id="btnTxApprove" class="btn primary">Confirm</button>
+            <button id="btnTxReject" class="btn secondary outline">Reject</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-swap" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="app">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+          <h2 class="step-title">Swap tokens</h2>
+          <p>Swap between tokens in your Casarc wallet.</p>
+
+          <label class="swap-label">From</label>
+          <select id="swapFromTokenSelect" class="input"></select>
+
+          <label class="swap-label">To</label>
+          <select id="swapToTokenSelect" class="input"></select>
+
+          <input id="swapAmount" class="input" placeholder="Amount to swap" />
+
+          <button id="btnSwapReview" class="btn primary full">Review swap</button>
+        </div>
+      </div>
+
+      <div id="screen-swap-review" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="swap">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+
+          <h2 class="step-title">Review swap</h2>
+          <p>Check the details before confirming.</p>
+
+          <div class="swap-review-box">
+            <div class="swap-review-row">
+              <div class="swap-review-label">From</div>
+              <div class="swap-review-value" id="swapReviewFrom">-</div>
+            </div>
+            <div class="swap-review-row">
+              <div class="swap-review-label">To</div>
+              <div class="swap-review-value" id="swapReviewTo">-</div>
+            </div>
+            <div class="swap-review-row">
+              <div class="swap-review-label">Network</div>
+              <div class="swap-review-value" id="swapReviewNetwork">ARC Testnet</div>
+            </div>
+            <div class="swap-review-row">
+              <div class="swap-review-label">Estimated fee</div>
+              <div class="swap-review-value" id="swapReviewFee">Will be estimated on-chain</div>
+            </div>
+          </div>
+
+          <div class="onboard-actions" style="margin-top: 16px;">
+            <button id="btnSwapConfirm" class="btn primary full">Confirm swap</button>
+            <button id="btnSwapCancel" class="btn secondary full">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-receive" class="screen centered hidden">
+        <div class="card-onboard">
+          <div class="onboard-header">
+            <button class="btn back" data-back="app">←</button>
+            <div class="brand-logo-text">Casarc Wallet</div>
+          </div>
+          <h2 class="step-title">Receive</h2>
+          <p>Your Casarc wallet address:</p>
+          <div id="receiveAddress" class="mnemonic-box"></div>
+          <button id="btnCopyReceive" class="btn primary">Copy address</button>
+        </div>
+      </div>
+
+      <div id="messageBar" class="message-bar hidden"></div>
+
+      <div
+        id="appDialogOverlay"
+        class="dialog-overlay hidden"
+        style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999;"
+      >
+        <div
+          class="app-dialog"
+          style="background:#04121f; border-radius:12px; padding:16px; width:280px; max-width:90%; margin:80px auto 0; box-shadow:0 8px 24px rgba(0,0,0,0.5); color:#fff; font-size:12px;"
+        >
+          <div id="appDialogTitle" class="app-dialog-title" style="font-weight:600; margin-bottom:4px;"></div>
+          <div id="appDialogMessage" class="app-dialog-message" style="margin-bottom:8px; white-space:pre-wrap;"></div>
+          <input id="appDialogInput" class="app-dialog-input" style="width:100%; box-sizing:border-box; margin-bottom:10px;" />
+          <div class="app-dialog-buttons" style="display:flex; justify-content:flex-end; gap:8px;">
+            <button id="appDialogCancel" class="btn secondary">Cancel</button>
+            <button id="appDialogOk" class="btn primary">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="lib/ethers.min.js"></script>
+    <script src="lib/supabase.bundle.js"></script>
+    <script src="src/supabase.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

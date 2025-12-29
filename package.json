@@ -1,0 +1,22 @@
+{
+  "name": "casarc-wallet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "background.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.88.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.1"
+  }
+}

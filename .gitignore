@@ -137,3 +137,15 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Keys / certs
+*.pem
+*.key
+*.p12
+id_rsa*
+*.crt
+*.cer
+
+# OS junk
+.DS_Store
+Thumbs.db

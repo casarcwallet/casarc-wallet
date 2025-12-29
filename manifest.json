@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Casarc Wallet",
+  "description": "Casarc Wallet was developed exclusively for Arc.",
+  "version": "0.3.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Casarc Wallet"
+  },
+  "permissions": ["storage", "identity"],
+  "host_permissions": [
+    "https://rpc.testnet.arc.network/*",
+    "https://nujvyleeibifqtbpeqzn.supabase.co/*",
+    "https://ddmjmbkgdcknajaomkmpmonaeafgkdhn.chromiumapp.org/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "https://nujvyleeibifqtbpeqzn.supabase.co/*",
+        "https://*.supabase.co/*",
+        "https://ddmjmbkgdcknajaomkmpmonaeafgkdhn.chromiumapp.org/*"
+      ],
+      "js": ["contentScript.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inpage.js", "lib/supabase.bundle.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
